@@ -67,7 +67,9 @@ async function fetchConfig() {
 }
 
 // ---------- modelo ----------
-const xOn = () => !!(cfg.grupo_cdmx && cfg.grupo_cdmx.adultos);
+// El 4º cuenta solo si tiene al menos un aeropuerto; sin aeropuerto no hay precio que sumar.
+const xSinAeropuerto = () => !!(cfg.grupo_cdmx && cfg.grupo_cdmx.adultos && !(cfg.grupo_cdmx.aeropuertos || []).length);
+const xOn = () => !!(cfg.grupo_cdmx && cfg.grupo_cdmx.adultos && (cfg.grupo_cdmx.aeropuertos || []).length);
 const xN = () => xOn() ? cfg.grupo_cdmx.adultos : 0;
 const people = () => cfg.adultos + xN();
 const bus = (ap) => ap === cfg.origen ? 0 : ((cfg.aeropuertos_alternos || {})[ap] || 0);
@@ -329,6 +331,7 @@ function readForm() {
 }
 function needsSearch() {
   const why = [];
+  if (xOn() && !Object.keys(latest).some(k => k.includes("_cdmx|"))) why.push("el 4º todavía no tiene precios buscados");
   if (cfg.adultos !== searched.adultos) why.push(`los precios guardados son para ${searched.adultos} desde Puebla`);
   if (xOn() && cfg.grupo_cdmx.adultos !== searched.xn) why.push(`los del 4º son para ${searched.xn} persona${searched.xn === 1 ? "" : "s"}`);
   if (xOn() && cfg.grupo_cdmx.aeropuertos.some(a => !searched.xaps.includes(a))) why.push("hay un aeropuerto de CDMX sin buscar");
@@ -346,6 +349,8 @@ function renderSavebar() {
 }
 $("rules").addEventListener("input", (e) => {
   if (view !== "editor" || !e.target.matches("input, select")) return;
+  // Al sumar al 4º sin aeropuertos marcados, se marcan los dos de CDMX
+  if (e.target.id === "cXon" && e.target.checked && !$("cXmex").checked && !$("cXnlu").checked) { $("cXmex").checked = true; $("cXnlu").checked = true; }
   readForm(); sel = null; renderAll();
 });
 $("resetBtn").onclick = () => { cfg = clone(base); fillForm(); sel = null; renderAll(); toast("Cambios descartados"); };
@@ -354,6 +359,7 @@ let busy = false;
 function setBusy(b) { busy = b; lockForm(); renderSavebar(); }
 async function save() {
   if (!dirty()) return true;
+  if (xSinAeropuerto()) { toast("Marca al menos un aeropuerto para el 4º (MEX o NLU) antes de guardar.", 5000); $("cXmex").focus(); return false; }
   setBusy(true); $("saveBtn").textContent = "Guardando…";
   try {
     const r = await gh("/contents/config.json", { method: "PUT", body: { message: "config: reglas del viaje desde la página", content: b64encode(JSON.stringify(cfg, null, 2) + "\n"), sha: configSha || undefined, branch: "main" } });
@@ -538,6 +544,10 @@ function renderAll() {
   const why = needsSearch();
   $("needSearch").hidden = !why.length;
   $("needSearch").textContent = why.length ? `Estos totales usan precios viejos: ${why.join("; ")}. ${view === "editor" ? "Guarda y busca para tener los reales." : ""}` : "";
+  if (xSinAeropuerto()) {
+    $("needSearch").hidden = false;
+    $("needSearch").textContent = `El 4º desde CDMX está activado pero sin aeropuerto, así que no se le busca precio y los totales son solo del grupo de Puebla. ${view === "editor" ? "Marca MEX o NLU y guarda." : ""} ${$("needSearch").textContent}`.trim();
+  }
 }
 
 // ---------- carga ----------

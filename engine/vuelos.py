@@ -214,10 +214,12 @@ def rango_fechas(centro: str, flex: int, excluir: list[str]) -> list[str]:
 
 
 def grupo_cdmx(cfg: dict) -> tuple[int, list[str]]:
-    """(adultos, aeropuertos) del integrante que sale de CDMX; (0, []) si está desactivado."""
+    """(adultos, aeropuertos) del integrante que sale de CDMX; (0, []) si está desactivado.
+    Sin aeropuertos no hay nada que buscar ni sumar: cuenta como desactivado."""
     x = cfg.get("grupo_cdmx") or {}
     n = int(x.get("adultos", 0) or 0)
-    return (n, list(x.get("aeropuertos", []))) if n else (0, [])
+    aps = list(x.get("aeropuertos", []))
+    return (n, aps) if n and aps else (0, [])
 
 
 def personas(cfg: dict) -> int:
