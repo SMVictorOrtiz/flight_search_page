@@ -1,0 +1,66 @@
+# Botón "Buscar ahora" de la página y respaldo cada 3 h por si la Mac está apagada.
+# La página sigue los pasos por nombre: "Buscar vuelos" y "Publicar datos". Si los cambias, cambia assets/app.js.
+name: Buscar vuelos
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 */3 * * *"   # UTC; se salta si la Mac buscó hace menos de 2 h
+
+permissions:
+  contents: write            # PUT de data/data.json por la Contents API
+
+concurrency:
+  group: buscar-vuelos
+  cancel-in-progress: false  # una búsqueda a la vez; la siguiente espera
+
+jobs:
+  buscar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      TZ: America/Mexico_City          # el motor guarda hora local de México, igual que la Mac
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      SERPAPI_KEY: ${{ secrets.SERPAPI_KEY }}
+      NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+      PUSHOVER_USER_KEY: ${{ secrets.PUSHOVER_USER_KEY }}
+      PUSHOVER_APP_TOKEN: ${{ secrets.PUSHOVER_APP_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: engine/requirements.txt
+
+      - name: Preparar
+        id: prep
+        run: |
+          pip install -q -r engine/requirements.txt
+          echo "VUELOS_HOME=$RUNNER_TEMP/vuelos" >> "$GITHUB_ENV"
+          export VUELOS_HOME="$RUNNER_TEMP/vuelos"
+          python -m unittest discover -s engine
+          if [ "$GITHUB_EVENT_NAME" = "schedule" ] && [ "$(python engine/vuelos.py --reciente 2 | tail -1)" = "si" ]; then
+            echo "saltar=true" >> "$GITHUB_OUTPUT"
+            echo "::notice title=Sin búsqueda::La última corrida publicada tiene menos de 2 h; la Mac está al día."
+          fi
+
+      - name: Buscar vuelos
+        if: steps.prep.outputs.saltar != 'true'
+        run: python engine/vuelos.py --solo-buscar
+
+      - name: Publicar datos
+        # También si la búsqueda falló: así la página ve las fallas en "salud"
+        if: ${{ !cancelled() && steps.prep.outputs.saltar != 'true' }}
+        run: python engine/vuelos.py --solo-publicar
+
+      - name: Resumen
+        if: ${{ !cancelled() && steps.prep.outputs.saltar != 'true' }}
+        run: |
+          {
+            echo "### Vuelos Mérida"
+            echo '```'
+            cat "$VUELOS_HOME/datos/top3.txt" 2>/dev/null | head -20 || echo "Sin combinación válida en esta corrida."
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
