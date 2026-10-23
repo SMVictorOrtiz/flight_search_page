@@ -6,3 +6,5 @@
 .env
 __pycache__/
 PROMPT_CLAUDE_CODE.md
+.taste-skill/
+.claude/
