@@ -39,7 +39,9 @@ import re
 import statistics
 import subprocess
 import sys
+import threading
 import time
+from concurrent.futures import ThreadPoolExecutor
 import urllib.parse
 import urllib.request
 from collections import defaultdict
@@ -102,6 +104,9 @@ DEFAULTS = {
     "serpapi_max_por_corrida_ci": 12,
     "serpapi_reserva_manual": 30,        # con tan pocas libres, CI solo usa SerpApi si apretaste "Buscar ahora"
     "pausa_entre_busquedas_seg": [4, 9],
+    # GitHub Actions: consultas en paralelo con pausa corta. La Mac sigue de una en una (cuida la IP de casa).
+    "hilos_ci": 4,
+    "pausa_ci_seg": [1.5, 3.5],
 }
 # Secretos que en CI llegan como variables de entorno (GitHub Secrets)
 SECRETOS_ENV = {"serpapi_key": "SERPAPI_KEY", "ntfy_topic": "NTFY_TOPIC",
@@ -485,7 +490,8 @@ class Buscador:
             self.mes.update(mes=mes, usadas=0, otros=0)
         self.en_corrida = 0
         self.fuentes: set[str] = set()
-        self.pausa = cfg["pausa_entre_busquedas_seg"]
+        self.candado = threading.Lock()  # contadores de SerpApi compartidos entre hilos
+        self.pausa = cfg["pausa_ci_seg"] if EN_CI else cfg["pausa_entre_busquedas_seg"]
 
     def serpapi_libres(self) -> int:
         return self.cfg["serpapi_limite_mes"] - self.mes["usadas"] - self.mes.get("otros", 0)
@@ -509,12 +515,15 @@ class Buscador:
             except FuenteError as e:
                 log.warning("fast-flights falló (%s). Se usa respaldo el resto de esta corrida.", e)
                 self.fast_ok = False
-        if self._serpapi_permitida(prioridad_alta):
-            try:
+        with self.candado:
+            permitida = self._serpapi_permitida(prioridad_alta)
+            if permitida:
                 self.sp["usadas"] += 1
                 self.mes["usadas"] += 1
                 self.en_corrida += 1
                 self.fuentes.add("SerpApi")
+        if permitida:
+            try:
                 return buscar_serpapi(self.cfg, o, d, fecha, adultos, con_equipaje), "serpapi"
             except FuenteError as e:
                 log.error("%s", e)
@@ -602,12 +611,24 @@ def _corrida(cfg: dict, estado: dict, ahora: datetime, b: "Buscador") -> int:
     # Días que ya sabemos que tienen vuelo, primero (importa si caemos al respaldo)
     tareas.sort(key=lambda t: f"{t[0]}|{t[1]}|{t[4]}" not in con_vuelo)
 
-    consultas_ok = 0
-    for direccion, ap, o, d, fecha, n_pax in tareas:
-        clave = f"{direccion}|{ap}|{fecha}"
-        opciones, fuente = b.buscar(o, d, fecha, clave in con_vuelo, n_pax)
+    def consultar(t):
+        direccion, ap, o, d, fecha, n_pax = t
+        opciones, fuente = b.buscar(o, d, fecha, f"{direccion}|{ap}|{fecha}" in con_vuelo, n_pax)
         if fuente != "sin-fuente":  # sin fuente no hubo petición: no hace falta esperar
             time.sleep(random.uniform(*b.pausa))
+        return t, opciones, fuente
+
+    hilos = max(1, int(cfg["hilos_ci"])) if EN_CI else 1
+    if hilos > 1:
+        log.info("%d consultas en %d hilos", len(tareas), hilos)
+        with ThreadPoolExecutor(hilos) as ex:
+            resultados = list(ex.map(consultar, tareas))
+    else:
+        resultados = map(consultar, tareas)  # perezoso: en la Mac se registra cada consulta al momento
+
+    consultas_ok = 0
+    for (direccion, ap, o, d, fecha, n_pax), opciones, fuente in resultados:
+        clave = f"{direccion}|{ap}|{fecha}"
         if opciones is None:
             log.info("%-6s %s %s: no se pudo consultar", direccion, ap, fecha)
             continue
