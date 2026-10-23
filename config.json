@@ -27,7 +27,11 @@
     "NLU": 545
   },
   "alternos_cada_horas": 2,
-  "grupo_cdmx": {},
+  "grupo_cdmx": {
+    "adultos": 1,
+    "aeropuertos": [],
+    "cada_horas": 1
+  },
   "equipaje_mano": 0,
   "maletas_documentadas": 0,
   "top_n": 3,
