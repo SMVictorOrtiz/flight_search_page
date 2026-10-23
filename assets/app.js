@@ -522,7 +522,9 @@ function renderHealth() {
     $("budgetNote").textContent = `SerpApi: van ${sp.usadas} de ${lim} búsquedas este mes; a este ritmo llegarías a unas ${proj}. Con menos de 30 libres, GitHub solo usa SerpApi cuando tú aprietas Buscar ahora.`;
   } else $("budgetNote").hidden = true;
   const src = esc(s.fuente || "Mac de Victor (Google Flights vía fast-flights)");
-  $("foot").innerHTML = `<span>Última búsqueda: ${src}${s.corridas_total ? `, ${s.corridas_total.toLocaleString("en-US")} búsquedas desde el ${fday(s.desde.slice(0, 10))}` : ""}</span><span>Respaldo y botón: GitHub Actions</span><span>Precios con impuestos y TUA, sin maletas ni asiento</span>`;
+  const m = s.motor || {}, motorDif = view === "editor" && m.mac && m.ci && m.mac !== m.ci;
+  $("foot").innerHTML = `<span>Última búsqueda: ${src}${s.corridas_total ? `, ${s.corridas_total.toLocaleString("en-US")} búsquedas desde el ${fday(s.desde.slice(0, 10))}` : ""}</span><span>Respaldo y botón: GitHub Actions</span><span>Precios con impuestos y TUA, sin maletas ni asiento</span>` +
+    (motorDif ? `<span>El motor de la Mac (${esc(m.mac)}) no es el del repo (${esc(m.ci)}): corre <code>bash engine/sync-mac.sh</code></span>` : "");
 }
 
 function renderAll() {

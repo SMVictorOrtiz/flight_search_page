@@ -1,0 +1,17 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "cramped-padding",
+        "value": "*",
+        "files": [
+          "index.html"
+        ],
+        "createdAt": "2026-10-23T05:52:13.537Z",
+        "reason": "Claude: .srow has padding-top 20px under its 1px border-top (measured in browser: content starts 21px below the border); detector reads markup without assets/app.css"
+      }
+    ]
+  }
+}
