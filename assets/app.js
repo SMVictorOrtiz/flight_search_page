@@ -124,7 +124,7 @@ function renderAnswer() {
   if (!c || c.void) {
     $("ansTitle").textContent = "Sin combinación válida";
     $("ansTotal").textContent = "—"; $("ansFacts").textContent = "Ninguna fecha cumple las reglas con los precios buscados.";
-    $("legs").innerHTML = ""; $("stack").innerHTML = ""; $("verdict").textContent = ""; $("tfill").style.width = "0"; $("tmax").textContent = ""; return;
+    $("legs").innerHTML = ""; $("stack").innerHTML = ""; $("verdict").textContent = ""; $("tfill").style.width = "0"; $("tmax").textContent = ""; $("tgoal").hidden = true; return;
   }
   const isBest = best && c.fi === best.fi && c.fv === best.fv;
   $("ansTitle").textContent = (isBest ? "Mejor combinación para " : "Combinación elegida para ") + who;
@@ -136,17 +136,21 @@ function renderAnswer() {
     ? `<b class="num">${mxn(diff)} arriba</b> de tu meta de ${mxn(g)}`
     : `<b class="num">${mxn(-diff)} abajo</b> de tu meta de ${mxn(g)}. Buen momento para comprar.`;
   const max = Math.max(g, c.total) * 1.1;
+  const gp = g / max * 100;
   $("tfill").style.width = (c.total / max * 100) + "%";
   $("tfill").style.background = diff > 0 ? "var(--bad)" : "var(--good)";
+  $("tgoal").style.left = gp + "%"; $("tgoal").hidden = false;
   $("tmax").textContent = "meta " + mxn(g);
+  $("tmax").style.setProperty("--gp", gp + "%");
+  $("tmax").style.transform = `translateX(${gp > 80 ? -100 : gp < 20 ? 0 : -50}%)`;
   const segs = [["Vuelos desde Puebla", c.grupo, "--seg1"], ["Camión", c.bus, "--seg2"], ["Vuelos desde CDMX", c.x, "--seg3"], ["Maletas", c.bags, "--seg2"]].filter(s => s[1] > 0);
   $("stack").innerHTML = segs.map(s => `<span style="flex-grow:${s[1]};background:var(${s[2]})" title="${s[0]} ${mxn(s[1])}"></span>`).join("");
   const leg = (sw, title, detail, price, link) => `<div class="leg"><i class="sw" style="background:var(${sw})"></i><div><div class="t">${title}</div><div class="d">${detail}</div></div><div class="p num">${mxn(price)}${safeLink(link) ? `<a href="${safeLink(link)}" target="_blank" rel="noopener">Google Flights</a>` : ""}</div></div>`;
   const fl = (x) => esc(`${x.v.aerolinea} ${x.v.vuelo} · ${x.v.de || x.ap} ${x.v.salida} → ${x.v.a} ${x.v.llegada}`);
   let h = "";
-  h += leg("--seg1", `Ida ${cfg.adultos} desde ${c.a.ap}`, fl(c.a) + ` · visto ${fstamp(c.a.v.cuando)}`, c.a.v.precio_total, c.a.v.link);
-  h += leg("--seg1", `Vuelta ${cfg.adultos} a ${c.b.ap}`, fl(c.b) + ` · visto ${fstamp(c.b.v.cuando)}`, c.b.v.precio_total, c.b.v.link);
-  if (c.bus) h += leg("--seg2", "Camión Puebla ⇄ aeropuerto", `${[c.a.ap, c.b.ap].filter(a => a !== cfg.origen).join(" y ")} · ${cfg.adultos} personas`, c.bus);
+  h += leg("--seg1", `Ida · ${cfg.adultos} personas desde ${c.a.ap}`, fl(c.a) + ` · visto ${fstamp(c.a.v.cuando)}`, c.a.v.precio_total, c.a.v.link);
+  h += leg("--seg1", `Vuelta · ${cfg.adultos} personas a ${c.b.ap}`, fl(c.b) + ` · visto ${fstamp(c.b.v.cuando)}`, c.b.v.precio_total, c.b.v.link);
+  if (c.bus) h += leg("--seg2", "Camión Puebla ⇄ aeropuerto", `${c.a.ap === c.b.ap ? c.a.ap + ", ida y vuelta" : [c.a.ap, c.b.ap].filter(a => a !== cfg.origen).map(a => a === c.a.ap ? a + " de ida" : a + " de vuelta").join(" y ")} · ${cfg.adultos} personas`, c.bus);
   if (c.xi) {
     const tog = (x, g2) => x.v.vuelo && x.v.vuelo === g2.v.vuelo ? `<span class="together">mismo vuelo</span>` : "";
     h += leg("--seg3", `Ida ${xN()} desde ${c.xi.ap}${tog(c.xi, c.a)}`, fl(c.xi), c.xi.cost, c.xi.v.link);
@@ -175,10 +179,10 @@ function renderMatrix() {
     h += `<div class="h rowh"><b>${fday(fi)}</b>${DIAS[dt(fi).getDay()]}</div>`;
     for (const fv of V) {
       const c = combo(fi, fv);
-      if (c.void) { h += `<div class="cell void" role="gridcell"><span class="chip">${c.void === "noches" ? c.n + " noches" : c.void}</span></div>`; continue; }
+      if (c.void) { h += `<div class="cell void"><span class="chip">${c.void === "noches" ? c.n + " noches" : c.void}</span></div>`; continue; }
       const b = band(c.total), isSel = sel ? sel[0] === fi && sel[1] === fv : best && best.fi === fi && best.fv === fv;
       const isBest = best && best.fi === fi && best.fv === fv;
-      h += `<button type="button" class="cell${isBest ? " best" : ""}" role="gridcell" aria-pressed="${isSel}" data-i="${fi}" data-v="${fv}" style="--band:var(${BANDS[b][0]})" aria-label="Ida ${fdate(fi)}, vuelta ${fdate(fv)}: ${mxn(c.total)}"><span class="chip num">${mxn(c.total)}<small>${isBest ? "mejor" : c.total <= goal() ? "en meta" : c.n + " n"}</small></span></button>`;
+      h += `<button type="button" class="cell${isBest ? " best" : ""}" aria-pressed="${isSel}" data-i="${fi}" data-v="${fv}" style="--band:var(${BANDS[b][0]})" aria-label="Ida ${fdate(fi)}, vuelta ${fdate(fv)}: ${mxn(c.total)}"><span class="chip num">${mxn(c.total)}<small>${isBest ? "mejor" : c.total <= goal() ? "en meta" : c.n + " n"}</small></span></button>`;
     }
   }
   mx.innerHTML = h;
@@ -229,9 +233,10 @@ function renderHist() {
   let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Historial de precio">`;
   for (let v = lo; v <= hi + 1; v += st) s += `<line x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}" stroke="var(--grid)" stroke-width="1"/><text x="${L - 8}" y="${y(v) + 4}" text-anchor="end">${mxn(v)}</text>`;
   days.forEach((d, i) => { if (dt(d).getDay() === 1) s += `<text x="${x(i)}" y="${H - 6}" text-anchor="middle">${fday(d)}</text>`; });
-  s += `<line x1="${L}" x2="${W - R}" y1="${y(ref)}" y2="${y(ref)}" stroke="var(--good)" stroke-width="1" stroke-dasharray="4 3"/><text x="${W - R}" y="${y(ref) - 6}" text-anchor="end" style="fill:var(--good)">meta para ${cfg.adultos}: ${mxn(ref)}</text>`;
+  s += `<line x1="${L}" x2="${W - R}" y1="${y(ref)}" y2="${y(ref)}" stroke="var(--good)" stroke-width="1" stroke-dasharray="4 3"/>`;
   let path = "", pen = false; ys.forEach((v, i) => { if (v == null) { pen = false; return; } path += (pen ? "L" : "M") + x(i).toFixed(1) + " " + y(v).toFixed(1); pen = true; });
   s += `<path d="${path}" fill="none" stroke="var(--ink)" stroke-width="2" stroke-linejoin="round"/>`;
+  s += `<text x="${L + 6}" y="${y(ref) - 6}" text-anchor="start" style="fill:var(--good)">meta para ${cfg.adultos}: ${mxn(ref)}</text>`;
   const iMin = ys.indexOf(Math.min(...vals));
   let iLast = ys.length - 1; while (iLast > 0 && ys[iLast] == null) iLast--;
   s += `<line x1="${x(iMin)}" x2="${x(iMin)}" y1="${T - 6}" y2="${y(ys[iMin])}" stroke="var(--faint)" stroke-width="1"/><text x="${x(iMin)}" y="${T - 10}" text-anchor="${iMin < 3 ? "start" : iMin > days.length - 4 ? "end" : "middle"}" style="fill:var(--ink)">mínimo ${mxn(ys[iMin])} · ${fday(days[iMin])}</text>`;
@@ -537,7 +542,7 @@ function renderAll() {
 
 // ---------- carga ----------
 function clearAnswer() {
-  $("stack").innerHTML = ""; $("tfill").style.width = "0"; $("tmax").textContent = ""; $("legend").innerHTML = ""; $("histfoot").innerHTML = "";
+  $("stack").innerHTML = ""; $("tfill").style.width = "0"; $("tmax").textContent = ""; $("tgoal").hidden = true; $("legend").innerHTML = ""; $("histfoot").innerHTML = "";
   $("chart").querySelector("svg")?.remove(); $("chart").querySelector(".fail-msg")?.remove();
 }
 function renderLoading() {

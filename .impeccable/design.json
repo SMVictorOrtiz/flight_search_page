@@ -1,0 +1,673 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-23T06:36:46.252441+00:00",
+  "title": "Design System: Vuelos Mérida",
+  "extensions": {
+    "colorMeta": {
+      "ground": {
+        "role": "neutral",
+        "displayName": "Manta",
+        "canonical": "#f6f7f3",
+        "dark": "#101310",
+        "tonalRamp": [
+          "#2a2e1f",
+          "#4a5136",
+          "#6a744d",
+          "#8a9765",
+          "#a5af87",
+          "#bfc6aa",
+          "#d9ddcd",
+          "#f4f5f0"
+        ]
+      },
+      "surface": {
+        "role": "neutral",
+        "displayName": "Blanco",
+        "canonical": "#ffffff",
+        "dark": "#171b17",
+        "tonalRamp": [
+          "#262626",
+          "#434343",
+          "#616161",
+          "#7e7e7e",
+          "#9b9b9b",
+          "#b8b8b8",
+          "#d5d5d5",
+          "#f2f2f2"
+        ]
+      },
+      "raised": {
+        "role": "neutral",
+        "displayName": "Manta alzada",
+        "canonical": "#eef0ea",
+        "dark": "#20251f",
+        "tonalRamp": [
+          "#282d20",
+          "#474f38",
+          "#667150",
+          "#859369",
+          "#a0ac8a",
+          "#bcc4ac",
+          "#d7dcce",
+          "#f3f4f0"
+        ]
+      },
+      "line": {
+        "role": "neutral",
+        "displayName": "Línea",
+        "canonical": "#e1e4dc",
+        "dark": "#283027",
+        "tonalRamp": [
+          "#272b21",
+          "#464c3b",
+          "#646d54",
+          "#828e6d",
+          "#9ea88e",
+          "#bac1af",
+          "#d6dbd0",
+          "#f3f4f1"
+        ]
+      },
+      "rule": {
+        "role": "neutral",
+        "displayName": "Regla",
+        "canonical": "#edefe9",
+        "dark": "#1f251e",
+        "tonalRamp": [
+          "#282c20",
+          "#474e39",
+          "#667051",
+          "#84926a",
+          "#a0ab8b",
+          "#bcc3ad",
+          "#d7dcce",
+          "#f3f4f0"
+        ]
+      },
+      "control": {
+        "role": "neutral",
+        "displayName": "Control",
+        "canonical": "#c9cdc3",
+        "dark": "#3d463b",
+        "tonalRamp": [
+          "#272a23",
+          "#454a3d",
+          "#626958",
+          "#808972",
+          "#9da492",
+          "#b9beb2",
+          "#d6d9d1",
+          "#f2f3f1"
+        ]
+      },
+      "ink": {
+        "role": "primary",
+        "displayName": "Tinta de hilo negro",
+        "canonical": "#171a17",
+        "dark": "#ecefe9",
+        "tonalRamp": [
+          "#242924",
+          "#3f483f",
+          "#5b665b",
+          "#768576",
+          "#95a195",
+          "#b4bcb4",
+          "#d3d8d3",
+          "#f1f3f1"
+        ]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "Gris tinta",
+        "canonical": "#545a52",
+        "dark": "#b3bbb0",
+        "tonalRamp": [
+          "#252824",
+          "#424740",
+          "#5e655c",
+          "#7b8478",
+          "#989f96",
+          "#b6bbb5",
+          "#d4d7d3",
+          "#f2f3f2"
+        ]
+      },
+      "faint": {
+        "role": "neutral",
+        "displayName": "Gris hilo",
+        "canonical": "#656b63",
+        "dark": "#9aa397",
+        "tonalRamp": [
+          "#262825",
+          "#424641",
+          "#5f645d",
+          "#7b8379",
+          "#999f97",
+          "#b7bbb5",
+          "#d4d7d3",
+          "#f2f3f2"
+        ]
+      },
+      "shell": {
+        "role": "primary",
+        "displayName": "Verde de banda",
+        "canonical": "#1d4d33",
+        "dark": "#173d29",
+        "tonalRamp": [
+          "#153825",
+          "#256241",
+          "#358c5d",
+          "#45b779",
+          "#6dc897",
+          "#98d8b5",
+          "#c2e8d4",
+          "#ecf8f2"
+        ]
+      },
+      "shell-ink": {
+        "role": "primary",
+        "displayName": "Blanco de banda",
+        "canonical": "#f3f6f1",
+        "dark": "#eef4ef",
+        "tonalRamp": [
+          "#252f1e",
+          "#405235",
+          "#5c764c",
+          "#789962",
+          "#96b185",
+          "#b5c7a9",
+          "#d3decc",
+          "#f2f5ef"
+        ]
+      },
+      "shell-muted": {
+        "role": "primary",
+        "displayName": "Verde niebla",
+        "canonical": "#b9cbbd",
+        "dark": "#bcd1c2",
+        "tonalRamp": [
+          "#212c23",
+          "#394d3e",
+          "#526f59",
+          "#6b9073",
+          "#8caa93",
+          "#adc2b2",
+          "#cfdbd2",
+          "#f0f4f1"
+        ]
+      },
+      "glass-shell-muted": {
+        "role": "primary",
+        "displayName": "Verde niebla sobre vidrio",
+        "canonical": "#d6e2d9",
+        "dark": "#d6e2d9",
+        "tonalRamp": [
+          "#202d23",
+          "#384f3e",
+          "#507158",
+          "#689373",
+          "#8aac92",
+          "#acc4b2",
+          "#cedcd2",
+          "#f0f4f1"
+        ]
+      },
+      "verde": {
+        "role": "secondary",
+        "displayName": "Hilo verde",
+        "canonical": "#2f8a52",
+        "dark": "#4fb377",
+        "tonalRamp": [
+          "#133922",
+          "#22653c",
+          "#319056",
+          "#40bb6f",
+          "#6acc8f",
+          "#95dbb0",
+          "#c1ead0",
+          "#ecf9f1"
+        ]
+      },
+      "amarillo": {
+        "role": "secondary",
+        "displayName": "Hilo amarillo",
+        "canonical": "#d9a521",
+        "dark": "#e6b83f",
+        "tonalRamp": [
+          "#42320a",
+          "#755912",
+          "#a87f19",
+          "#daa621",
+          "#e5bb51",
+          "#eccf84",
+          "#f4e3b6",
+          "#fcf6e9"
+        ]
+      },
+      "rosa": {
+        "role": "secondary",
+        "displayName": "Hilo rosa",
+        "canonical": "#d43f7a",
+        "dark": "#ec6a9c",
+        "tonalRamp": [
+          "#3f0e21",
+          "#6e193b",
+          "#9e2354",
+          "#cd2e6d",
+          "#da5b8e",
+          "#e58baf",
+          "#f0bbd0",
+          "#faeaf1"
+        ]
+      },
+      "rojo": {
+        "role": "secondary",
+        "displayName": "Hilo rojo",
+        "canonical": "#b3242c",
+        "dark": "#e2565d",
+        "tonalRamp": [
+          "#400d10",
+          "#70171c",
+          "#a12028",
+          "#d12a33",
+          "#dd5860",
+          "#e7898e",
+          "#f1b9bc",
+          "#fbeaeb"
+        ]
+      },
+      "good": {
+        "role": "secondary",
+        "displayName": "Bueno",
+        "canonical": "#23784a",
+        "dark": "#5cc287",
+        "tonalRamp": [
+          "#113b25",
+          "#1e6840",
+          "#2c955c",
+          "#39c378",
+          "#64d296",
+          "#91dfb5",
+          "#beecd3",
+          "#ebf9f2"
+        ]
+      },
+      "bad": {
+        "role": "secondary",
+        "displayName": "Malo",
+        "canonical": "#b3242c",
+        "dark": "#ec6a70",
+        "tonalRamp": [
+          "#400d10",
+          "#70171c",
+          "#a12028",
+          "#d12a33",
+          "#dd5860",
+          "#e7898e",
+          "#f1b9bc",
+          "#fbeaeb"
+        ]
+      },
+      "seg1": {
+        "role": "neutral",
+        "displayName": "Segmento 1",
+        "canonical": "#171a17",
+        "dark": "#ecefe9",
+        "tonalRamp": [
+          "#242924",
+          "#3f483f",
+          "#5b665b",
+          "#768576",
+          "#95a195",
+          "#b4bcb4",
+          "#d3d8d3",
+          "#f1f3f1"
+        ]
+      },
+      "seg2": {
+        "role": "neutral",
+        "displayName": "Segmento 2",
+        "canonical": "#7c857a",
+        "dark": "#8d968a",
+        "tonalRamp": [
+          "#252825",
+          "#424640",
+          "#5e655c",
+          "#7a8378",
+          "#989f96",
+          "#b6bbb5",
+          "#d4d7d3",
+          "#f2f3f2"
+        ]
+      },
+      "seg3": {
+        "role": "neutral",
+        "displayName": "Segmento 3",
+        "canonical": "#c3cabe",
+        "dark": "#4a5348",
+        "tonalRamp": [
+          "#262a22",
+          "#424a3d",
+          "#5f6a57",
+          "#7c8a71",
+          "#99a591",
+          "#b7bfb1",
+          "#d4d9d1",
+          "#f2f4f1"
+        ]
+      },
+      "notice-bg": {
+        "role": "neutral",
+        "displayName": "Fondo de aviso",
+        "canonical": "#fff8e6",
+        "dark": "#2a2412",
+        "tonalRamp": [
+          "#4c3700",
+          "#876100",
+          "#c18b00",
+          "#fbb500",
+          "#ffc737",
+          "#ffd771",
+          "#ffe8ab",
+          "#fff8e6"
+        ]
+      },
+      "notice-line": {
+        "role": "neutral",
+        "displayName": "Borde de aviso",
+        "canonical": "#f0d48a",
+        "dark": "#5c4a1c",
+        "tonalRamp": [
+          "#443409",
+          "#775b0f",
+          "#ab8216",
+          "#dfa91d",
+          "#e8be4d",
+          "#efd181",
+          "#f5e4b5",
+          "#fcf7e8"
+        ]
+      },
+      "notice-ink": {
+        "role": "neutral",
+        "displayName": "Tinta de aviso",
+        "canonical": "#7a4a07",
+        "dark": "#f0cf80",
+        "tonalRamp": [
+          "#482c04",
+          "#7f4d07",
+          "#b76f0a",
+          "#ee900e",
+          "#f4aa42",
+          "#f7c279",
+          "#fadbb0",
+          "#fef4e7"
+        ]
+      },
+      "grid": {
+        "role": "neutral",
+        "displayName": "Retícula",
+        "canonical": "#e3e6de",
+        "dark": "#263025",
+        "tonalRamp": [
+          "#282c21",
+          "#464d3a",
+          "#646e53",
+          "#828f6c",
+          "#9ea98d",
+          "#bac2ae",
+          "#d7dbcf",
+          "#f3f4f0"
+        ]
+      }
+    },
+    "themes": {
+      "dark": {
+        "selectors": [
+          "@media (prefers-color-scheme: dark) :root:not([data-theme=\"light\"])",
+          ":root[data-theme=\"dark\"]"
+        ],
+        "colorScheme": "dark"
+      }
+    },
+    "glass": {
+      "scope": [
+        ".navlayer (.shell, .tokenbar, .runstrip)",
+        ".toast",
+        "body::before (safe-area)"
+      ],
+      "filter": "blur(18px) saturate(170%)",
+      "shell": "color-mix(in srgb, var(--shell) 90%, transparent)",
+      "plane": "color-mix(in srgb, color-mix(in srgb, var(--shell) 7%, var(--surface)) 90%, transparent)",
+      "toast": "color-mix(in srgb, var(--ink) 84%, transparent)",
+      "edge": "color-mix(in srgb, #ffffff 18%, transparent)",
+      "line": "color-mix(in srgb, var(--line) 85%, transparent)",
+      "hairline": "2px: 1px #fff 12% over 1px #000 30%",
+      "fallbacks": [
+        "@supports not (backdrop-filter)",
+        "prefers-reduced-transparency: reduce",
+        "prefers-contrast: more"
+      ]
+    },
+    "typographyMeta": {
+      "answer": {
+        "displayName": "Respuesta",
+        "purpose": "Mejor total del grupo; 30px bajo 640px."
+      },
+      "section": {
+        "displayName": "Sección",
+        "purpose": "Títulos de panel y marca."
+      },
+      "body": {
+        "displayName": "Cuerpo",
+        "purpose": "Texto, tablas, inputs, botones."
+      },
+      "label": {
+        "displayName": "Etiqueta",
+        "purpose": "Etiquetas, pestañas, avisos, cifras de casilla."
+      },
+      "small": {
+        "displayName": "Pequeño",
+        "purpose": "Metadatos, ejes, encabezados de tabla, leyenda."
+      },
+      "micro": {
+        "displayName": "Micro",
+        "purpose": "Píldoras, subtítulo de casilla."
+      }
+    },
+    "shadows": [
+      {
+        "name": "navlayer",
+        "value": "0 8px 24px -18px rgba(0,0,0,.4)",
+        "purpose": "Capa de navegación flotante."
+      },
+      {
+        "name": "toast",
+        "value": "0 10px 28px -14px rgba(0,0,0,.45)",
+        "purpose": "Toast."
+      },
+      {
+        "name": "stitch-chip",
+        "value": "0 1px 2px rgba(0,0,0,.08)",
+        "purpose": "Chip de cifra sobre la puntada."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-out",
+        "value": "cubic-bezier(0.23, 1, 0.32, 1)",
+        "purpose": "Toda transición de estado."
+      },
+      {
+        "name": "press",
+        "value": "transform 140ms",
+        "purpose": "scale(0.97) al presionar."
+      },
+      {
+        "name": "color",
+        "value": "150ms ease",
+        "purpose": "Bordes y fondos en hover."
+      },
+      {
+        "name": "step-dot",
+        "value": "background-color 200ms",
+        "purpose": "Punto de paso de búsqueda."
+      },
+      {
+        "name": "toast",
+        "value": "opacity 180ms, transform 220ms",
+        "purpose": "Entrada del toast."
+      },
+      {
+        "name": "fill",
+        "value": "width / flex-grow 250ms",
+        "purpose": "Barra de meta y barra apilada."
+      },
+      {
+        "name": "reduced-motion",
+        "value": "transition: none; animation: none",
+        "purpose": "prefers-reduced-motion: reduce."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "md",
+        "value": "900px"
+      },
+      {
+        "name": "sm",
+        "value": "640px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Botón normal",
+      "kind": "button",
+      "refersTo": "button-default",
+      "description": "Acción secundaria en contenido (Deshacer, Guardar, Cancelar).",
+      "html": "<button class=\"ds-btn\">Guardar</button>",
+      "css": ".ds-btn{font:500 14px/1 var(--font);height:34px;padding:0 14px;border-radius:6px;border:1px solid var(--control);background:var(--surface);color:var(--ink);cursor:pointer;display:inline-flex;align-items:center;gap:8px;transition:transform 140ms cubic-bezier(0.23,1,0.32,1),background 150ms ease}.ds-btn:active{transform:scale(0.97)}.ds-btn:focus-visible{outline:2px solid var(--verde);outline-offset:2px}.ds-btn:disabled{cursor:not-allowed;color:var(--faint);background:var(--raised)}"
+    },
+    {
+      "name": "Botón primario",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Una acción principal por bloque (Guardar y buscar, Usar token).",
+      "html": "<button class=\"ds-btn-primary\">Guardar y buscar</button>",
+      "css": ".ds-btn-primary{font:500 14px/1 var(--font);height:34px;padding:0 14px;border-radius:6px;border:1px solid var(--ink);background:var(--ink);color:var(--surface);cursor:pointer;transition:transform 140ms cubic-bezier(0.23,1,0.32,1)}.ds-btn-primary:active{transform:scale(0.97)}.ds-btn-primary:focus-visible{outline:2px solid var(--verde);outline-offset:2px}"
+    },
+    {
+      "name": "Banda de vidrio con acciones",
+      "kind": "nav",
+      "refersTo": "keybtn",
+      "description": "Banda verde flotante con marca, frescura, Editar y Buscar ahora.",
+      "html": "<header class=\"ds-shell\"><div class=\"ds-brand\"><b>Vuelos Mérida</b><span>Puebla y CDMX ⇄ Mérida · diciembre 2026</span></div><span class=\"ds-fresh\"><i></i>Visto hace 12 min</span><button class=\"ds-keybtn\">Editar</button><button class=\"ds-onshell\"><svg viewBox=\"0 0 16 16\" width=\"15\" height=\"15\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\"><path d=\"M13.5 8a5.5 5.5 0 1 1-1.6-3.9M13.5 2.5v3h-3\"/></svg>Buscar ahora</button></header>",
+      "css": ".ds-shell{display:flex;align-items:center;gap:16px;padding:12px 16px;font-family:var(--font);color:var(--shell-ink);background:color-mix(in srgb,var(--shell) 90%,transparent);backdrop-filter:blur(18px) saturate(170%);-webkit-backdrop-filter:blur(18px) saturate(170%);box-shadow:0 8px 24px -18px rgba(0,0,0,.4)}.ds-brand{display:flex;flex-direction:column;margin-right:auto}.ds-brand b{font-size:16px;font-weight:600}.ds-brand span,.ds-fresh{font-size:12px;color:#d6e2d9}.ds-fresh{display:flex;align-items:center;gap:8px}.ds-fresh i{width:8px;height:8px;border-radius:50%;background:#6fd39a}.ds-keybtn{font:500 12px var(--font);color:var(--shell-ink);min-height:34px;padding:0 12px;border-radius:999px;border:1px solid color-mix(in srgb,#fff 18%,transparent);background:color-mix(in srgb,var(--shell-ink) 10%,transparent);cursor:pointer;transition:background-color 150ms ease,transform 140ms cubic-bezier(0.23,1,0.32,1)}.ds-keybtn:hover{background:color-mix(in srgb,var(--shell-ink) 18%,transparent)}.ds-keybtn:active,.ds-onshell:active{transform:scale(0.97)}.ds-keybtn:focus-visible,.ds-onshell:focus-visible{outline:2px solid var(--shell-ink);outline-offset:2px}.ds-onshell{font:600 14px/1 var(--font);height:34px;padding:0 16px;border-radius:999px;border:1px solid var(--shell-ink);background:var(--shell-ink);color:var(--shell);display:inline-flex;align-items:center;gap:8px;cursor:pointer;transition:transform 140ms cubic-bezier(0.23,1,0.32,1)}"
+    },
+    {
+      "name": "Campo",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Input numérico, fecha, texto o select de las reglas del viaje.",
+      "html": "<label class=\"ds-field\"><span>Meta total (MXN)</span><input class=\"ds-input\" type=\"number\" value=\"16000\"><small>Para 4 personas</small></label>",
+      "css": ".ds-field{display:grid;gap:6px;font-family:var(--font);max-width:200px}.ds-field span{font-size:13px;font-weight:500;color:var(--ink)}.ds-field small{font-size:12px;color:var(--faint)}.ds-input{font:400 14px var(--font);color:var(--ink);background:var(--surface);border:1px solid var(--control);border-radius:6px;height:34px;padding:0 10px;font-variant-numeric:tabular-nums}.ds-input:focus-visible{outline:2px solid var(--verde);outline-offset:2px}.ds-input:disabled{background:var(--raised);color:var(--muted);border-color:var(--line)}"
+    },
+    {
+      "name": "Casilla de punto de cruz",
+      "kind": "custom",
+      "refersTo": "matrix-cell",
+      "description": "Celda ida×vuelta teñida por cuartil; estados normal, mejor/seleccionada y vacía.",
+      "html": "<div class=\"ds-mx\"><button class=\"ds-cell\" style=\"--band:var(--verde)\" aria-pressed=\"true\"><span class=\"ds-chip\">$10,756<small>mejor</small></span></button><button class=\"ds-cell\" style=\"--band:var(--rosa)\" aria-pressed=\"false\"><span class=\"ds-chip\">$12,980<small>6 n</small></span></button><div class=\"ds-cell ds-void\"><span class=\"ds-chip\">4 noches</span></div></div>",
+      "css": ".ds-mx{display:grid;grid-template-columns:repeat(3,96px);gap:6px;font-family:var(--font)}.ds-cell{position:relative;height:62px;border-radius:4px;border:1px solid transparent;background:color-mix(in srgb,var(--band,var(--control)) 12%,var(--surface));display:grid;place-items:center;cursor:pointer;padding:0;font:inherit;color:var(--ink);overflow:hidden;transition:transform 140ms cubic-bezier(0.23,1,0.32,1),border-color 150ms ease}.ds-cell::before{content:\"\";position:absolute;inset:0;background:var(--band);opacity:.9;-webkit-mask:url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='9'%3E%3Cpath d='M2 2l5 5M7 2L2 7' stroke='black' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E\") 0 0/9px 9px repeat;mask:url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='9'%3E%3Cpath d='M2 2l5 5M7 2L2 7' stroke='black' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E\") 0 0/9px 9px repeat}.ds-chip{position:relative;background:var(--surface);border-radius:3px;padding:3px 6px;font-weight:600;font-size:13px;line-height:1.1;text-align:center;box-shadow:0 1px 2px rgba(0,0,0,.08);font-variant-numeric:tabular-nums}.ds-chip small{display:block;font-weight:400;font-size:11px;color:var(--muted)}.ds-cell:hover{border-color:var(--control)}.ds-cell:active{transform:scale(0.97)}.ds-cell:focus-visible{outline:2px solid var(--verde);outline-offset:2px}.ds-cell[aria-pressed=\"true\"]{border:2px solid var(--ink)}.ds-cell[aria-pressed=\"true\"] .ds-chip small{color:var(--ink);font-weight:600}.ds-void{cursor:default;background:transparent;border:1px dashed var(--line)}.ds-void::before{display:none}.ds-void .ds-chip{background:transparent;box-shadow:none;font-weight:400;color:var(--faint);font-size:11px}"
+    },
+    {
+      "name": "Barra de meta",
+      "kind": "custom",
+      "refersTo": "panel",
+      "description": "Total contra meta, con la marca de meta en su posición real.",
+      "html": "<div class=\"ds-target\"><div class=\"ds-verdict\">Faltan <b>$1,240</b> para la meta</div><div class=\"ds-bar\"><div class=\"ds-fill\" style=\"width:78%\"></div><i class=\"ds-goal\" style=\"left:70%\"></i></div><div class=\"ds-row\"><span>$0</span><span style=\"position:absolute;left:70%;transform:translateX(-50%)\">$16,000</span></div></div>",
+      "css": ".ds-target{display:grid;gap:6px;font-family:var(--font);max-width:360px}.ds-verdict{font-size:13px;color:var(--ink)}.ds-verdict b{font-weight:600;color:var(--bad)}.ds-bar{position:relative;height:8px;border-radius:999px;background:var(--raised)}.ds-fill{position:absolute;inset:0 auto 0 0;border-radius:999px;background:var(--ink);transition:width 250ms cubic-bezier(0.23,1,0.32,1)}.ds-goal{position:absolute;top:-3px;bottom:-3px;width:2px;margin-left:-1px;background:var(--ink);border-radius:1px}.ds-row{position:relative;min-height:1.45em;font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}"
+    },
+    {
+      "name": "Pasos de la búsqueda",
+      "kind": "custom",
+      "refersTo": "panel",
+      "description": "Franja de vidrio: En cola, Buscando, Publicando, Listo; variante de fallo.",
+      "html": "<div class=\"ds-steps\"><span class=\"ds-step done\"><i></i>En cola</span><span class=\"ds-step now\"><i></i>Buscando</span><span class=\"ds-step\"><i></i>Publicando</span><span class=\"ds-step\"><i></i>Listo</span></div>",
+      "css": ".ds-steps{display:flex;gap:6px;align-items:center;flex-wrap:wrap;padding:10px 16px;font:400 13px var(--font);background:color-mix(in srgb,color-mix(in srgb,var(--shell) 7%,var(--surface)) 90%,transparent);backdrop-filter:blur(18px) saturate(170%);border-bottom:1px solid color-mix(in srgb,var(--line) 85%,transparent)}.ds-step{display:inline-flex;align-items:center;gap:6px;color:var(--faint)}.ds-step i{width:7px;height:7px;border-radius:50%;background:var(--control);transition:background-color 200ms cubic-bezier(0.23,1,0.32,1)}.ds-step+.ds-step::before{content:\"\";width:14px;height:1px;background:var(--control);margin-right:6px}.ds-step.done{color:var(--muted)}.ds-step.done i{background:var(--verde)}.ds-step.now{color:var(--ink);font-weight:600}.ds-step.now i{background:var(--amarillo)}.ds-step.fail{color:var(--bad);font-weight:600}.ds-step.fail i{background:var(--bad)}"
+    },
+    {
+      "name": "Pestañas segmentadas",
+      "kind": "chip",
+      "refersTo": "tab-selected",
+      "description": "Selector de serie del historial y tipo de lista.",
+      "html": "<div class=\"ds-tabs\"><button aria-pressed=\"true\">Mejor de cualquier fecha</button><button aria-pressed=\"false\">Fechas elegidas</button></div>",
+      "css": ".ds-tabs{display:inline-flex;background:var(--raised);border-radius:6px;padding:2px;font-family:var(--font)}.ds-tabs button{appearance:none;border:1px solid transparent;background:none;font:inherit;font-size:13px;padding:6px 12px;border-radius:4px;color:var(--muted);cursor:pointer}.ds-tabs button:focus-visible{outline:2px solid var(--verde);outline-offset:2px}.ds-tabs button[aria-pressed=\"true\"]{background:var(--surface);color:var(--ink);font-weight:600;border-color:var(--line)}"
+    },
+    {
+      "name": "Aviso",
+      "kind": "card",
+      "refersTo": "notice",
+      "description": "Precios viejos, necesita búsqueda, presupuesto de SerpApi.",
+      "html": "<div class=\"ds-notice\"><b>Precios de hace 5 h.</b> La Mac no ha publicado desde entonces.</div>",
+      "css": ".ds-notice{background:var(--notice-bg);border:1px solid var(--notice-line);color:var(--notice-ink);border-radius:6px;padding:10px 12px;font:400 13px var(--font)}.ds-notice b{font-weight:600}"
+    },
+    {
+      "name": "Toast",
+      "kind": "custom",
+      "refersTo": "toast",
+      "description": "Confirmación breve en cápsula de vidrio, abajo al centro.",
+      "html": "<div class=\"ds-toast\">Guardado en config.json</div>",
+      "css": ".ds-toast{display:inline-block;background:color-mix(in srgb,var(--ink) 84%,transparent);backdrop-filter:blur(18px) saturate(170%);-webkit-backdrop-filter:blur(18px) saturate(170%);border:1px solid color-mix(in srgb,#fff 18%,transparent);box-shadow:0 10px 28px -14px rgba(0,0,0,.45);color:var(--surface);padding:10px 16px;border-radius:999px;font:400 13px var(--font)}"
+    }
+  ],
+  "narrative": {
+    "northStar": "El huipil de precios",
+    "overview": "La matriz ida×vuelta es el producto, y está bordada: cada casilla es una puntada en cruz teñida con un hilo de bordado yucateco que funciona como dato, no como adorno. Sobre fondo de manta, con tinta de hilo negro, un solo sans de trabajo con cifras tabulares. La banda verde oscuro del encabezado es el único bloque de color sólido de la pantalla.\n\nDensidad de herramienta (modo Operate): paneles blancos con borde fino de 1px, separadores de regla en lugar de tarjetas anidadas, cifras primero. La capa de navegación flota en vidrio (el lenguaje Liquid Glass de Apple, pedido explícitamente por el usuario y traducido a CSS), confinada a lo que flota sobre el contenido; el contenido nunca lleva vidrio.\n\nEl movimiento solo comunica estado (presión, selección, progreso), corto y con salida suave.",
+    "keyCharacteristics": [
+      "Puntada en cruz (máscara SVG en X de 9px) como textura de dato en casillas y leyenda.",
+      "Hilos de color = cuartiles de precio; tinta negra = la respuesta.",
+      "Un solo tipo, Hanken Grotesk, con `tabular-nums` en toda cifra.",
+      "Vidrio solo en la capa flotante (banda, token, pasos, toast), con caídas sólidas.",
+      "Tema claro y oscuro completos por tokens en `:root`."
+    ],
+    "rules": [
+      {
+        "name": "La regla del hilo como dato",
+        "body": "Verde, amarillo, rosa y rojo solo marcan precio. En la matriz, tal como está construida, las casillas válidas se agrupan por cuartil de sus totales (verde = cuartil más barato … rojo = más caro) y la leyenda muestra el rango en pesos de cada banda. Pendiente de decisión del usuario: bandear contra la meta en lugar de por cuartil.",
+        "section": "colors"
+      },
+      {
+        "name": "La regla de la tinta",
+        "body": "La respuesta (total, barra de meta, línea del historial, selección) va en tinta negra, nunca en un hilo de color.",
+        "section": "colors"
+      },
+      {
+        "name": "La regla tabular",
+        "body": "Toda cifra lleva `font-variant-numeric: tabular-nums` (clase `num` o texto del gráfico).",
+        "section": "typography"
+      },
+      {
+        "name": "La regla del vidrio flotante",
+        "body": "Solo `.navlayer` (banda verde, barra del token, pasos de la búsqueda; pegajosa arriba) y el toast llevan vidrio: `backdrop-filter: blur(18px) saturate(170%)`, banda al 90% de shell, planos al 90% de blanco teñido 7% hacia shell, toast al 84% de tinta, borde de luz blanca al 18%. La opacidad es alta a propósito para pasar AA aunque pase una casilla rosa por detrás. Caída a sólido sin `backdrop-filter`, con `prefers-reduced-transparency: reduce` o con `prefers-contrast: more`. Respuesta, matriz, historial, tablas y reglas nunca llevan vidrio.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do reservar verde, amarillo, rosa y rojo para bandas de precio y estado; la respuesta va en tinta.",
+      "Do poner `tabular-nums` en cada cifra.",
+      "Do confinar el vidrio a la capa flotante, con opacidad ≥84% y caída sólida en los tres casos (sin soporte, menos transparencia, más contraste).",
+      "Do marcar la meta en su posición real de la escala, no al final de la barra.",
+      "Do dar 44px de alto a todo control táctil bajo 640px.",
+      "Do cargar con barras planas del tamaño final y mostrar el error dentro del bloque que falló, con \"Reintentar\".",
+      "Do definir todo color nuevo como token en `:root` con su par oscuro en ambos bloques de tema."
+    ],
+    "donts": [
+      "Don't poner vidrio en paneles, matriz, historial, tablas o reglas.",
+      "Don't usar un segundo tipo de letra.",
+      "Don't animar fuera de un cambio de estado ni pasar de 250ms.",
+      "Don't dejar una etiqueta del gráfico bajo la línea; píntala después y con halo de superficie."
+    ]
+  }
+}
