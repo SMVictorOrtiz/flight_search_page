@@ -29,7 +29,10 @@
   "alternos_cada_horas": 2,
   "grupo_cdmx": {
     "adultos": 1,
-    "aeropuertos": [],
+    "aeropuertos": [
+      "MEX",
+      "NLU"
+    ],
     "cada_horas": 1
   },
   "equipaje_mano": 0,
