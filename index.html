@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Vuelos Mérida</title>
 <meta name="description" content="Monitor de precios del viaje Puebla y CDMX ⇄ Mérida, diciembre 2026.">
+<!-- URL del Worker de Cloudflare que guarda el token (worker/). Vacío: la página es solo lectura. -->
+<meta name="vuelos-worker" content="https://vuelos-merida.vuelos-victor.workers.dev">
 <meta name="theme-color" content="#1d4d33">
 <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#173d29">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='3' fill='%231d4d33'/%3E%3Cpath d='M4 4l8 8M12 4l-8 8' stroke='%23f3f6f1' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E">
@@ -33,12 +35,12 @@
 
   <form class="tokenbar" id="tokenbar" hidden>
     <div class="wrap">
-      <label for="tokenIn">Token de GitHub</label>
-      <input type="password" id="tokenIn" autocomplete="off" spellcheck="false" placeholder="github_pat_…">
-      <button type="submit" class="btn primary" id="tokenSave">Usar token</button>
+      <label for="tokenIn">Contraseña</label>
+      <input type="password" id="tokenIn" autocomplete="current-password" spellcheck="false">
+      <button type="submit" class="btn primary" id="tokenSave">Entrar</button>
       <button type="button" class="btn" id="tokenCancel">Cancelar</button>
       <span class="err" id="tokenErr" role="alert" hidden></span>
-      <span class="meta">Se guarda solo en este navegador. Fine-grained, solo para este repo, con Contents y Actions de lectura y escritura.</span>
+      <span class="meta">Para cambiar las reglas y lanzar búsquedas. La sesión dura 30 días en este navegador.</span>
     </div>
   </form>
 
@@ -157,7 +159,7 @@
       <div class="notice" id="needSearch" hidden></div>
       <div class="notice" id="budgetNote" hidden></div>
       <div class="savebar editonly">
-        <span class="meta" id="saveMeta">Se guarda en <code>config.json</code> del repo con tu token</span>
+        <span class="meta" id="saveMeta">Se guarda en <code>config.json</code> del repo</span>
         <button type="button" class="btn" id="resetBtn">Deshacer cambios</button>
         <button type="button" class="btn" id="saveBtn">Guardar</button>
         <button type="button" class="btn primary" id="saveRunBtn">Guardar y buscar</button>

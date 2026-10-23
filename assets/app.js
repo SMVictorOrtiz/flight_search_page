@@ -1,10 +1,12 @@
 (() => {
-// Datos: Contents API (fresca, sin la caché de ~10 min de Pages); si falla, data/data.json de Pages.
-// Escritura (config.json, dispatch de buscar.yml): token fine-grained guardado solo en este navegador.
+// Lectura: data.json y config.json desde Pages (CDN) y la Contents API a la vez; gana la copia más nueva,
+// y la última buena se guarda en este navegador para pintar al instante la próxima vez.
+// Escritura (reglas, buscar): a través del Worker de Cloudflare, que guarda el token de GitHub.
+// Aquí solo vive una sesión firmada que se obtiene con la contraseña.
 const REPO = "SMVictorOrtiz/flight_search_page";
 const API = `https://api.github.com/repos/${REPO}`;
-const WORKFLOW = "buscar.yml";
-const TOKEN_KEY = "vuelos-token";
+const WORKER = (document.querySelector('meta[name="vuelos-worker"]')?.content || "").replace(/\/$/, "");
+const SESSION_KEY = "vuelos-sesion", CACHE_KEY = "vuelos-cache", LIMIT_KEY = "vuelos-api-limite";
 const STALE_H = 3;
 
 const $ = (id) => document.getElementById(id);
@@ -24,46 +26,59 @@ const addDays = (iso, n) => { const d = dt(iso); d.setDate(d.getDate() + n); ret
 const nights = (a, b) => Math.round((dt(b) - dt(a)) / 864e5);
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const clone = (o) => JSON.parse(JSON.stringify(o));
+const store = { get(k) { try { return JSON.parse(localStorage.getItem(k)); } catch (e) { return null; } },
+                set(k, v) { try { v == null ? localStorage.removeItem(k) : localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} } };
 
 let DATA = null, latest = {}, hist = {}, days = [];
 let base = null, cfg = null, configSha = null, searched = null;
 let view = "group", sel = null, histMode = "best", optMode = "combos", showAll = false;
 
-// ---------- GitHub ----------
-let token = null;
-try { token = localStorage.getItem(TOKEN_KEY); } catch (e) {}
-
-async function gh(path, { method = "GET", body, raw = false, auth = true } = {}) {
-  const headers = { Accept: raw ? "application/vnd.github.raw+json" : "application/vnd.github+json" };
-  if (token && auth) headers.Authorization = `Bearer ${token}`;
-  let r;
-  try { r = await fetch(API + path, { method, headers, cache: "no-store", body: body ? JSON.stringify(body) : undefined }); }
-  catch (e) { const err = new Error("red"); err.status = 0; throw err; }
-  if (!r.ok) { const err = new Error(`GitHub ${r.status}`); err.status = r.status; try { err.body = await r.json(); } catch (e) {} throw err; }
-  if (r.status === 204) return null;
-  return raw ? r.text() : r.json();
+// ---------- lectura pública: Pages y API en paralelo ----------
+// La API sin token permite 60 consultas por hora por IP; si se agotan, se usa solo Pages hasta que se renueven.
+const apiAgotada = () => (store.get(LIMIT_KEY) || 0) > Date.now();
+async function desdeApi(ruta) {
+  if (apiAgotada()) throw new Error("límite");
+  const r = await fetch(`${API}/contents/${ruta}?ref=main`, { headers: { Accept: "application/vnd.github.raw+json" }, cache: "no-store" });
+  const quedan = Number(r.headers.get("x-ratelimit-remaining")), reset = Number(r.headers.get("x-ratelimit-reset"));
+  if ((r.status === 403 || r.status === 429 || quedan <= 2) && reset) store.set(LIMIT_KEY, reset * 1000);
+  if (!r.ok) throw new Error("api " + r.status);
+  return r.json();
 }
-const b64encode = (str) => { const bytes = new TextEncoder().encode(str); let bin = ""; bytes.forEach((b) => bin += String.fromCharCode(b)); return btoa(bin); };
-const b64decode = (s) => new TextDecoder().decode(Uint8Array.from(atob(s.replace(/\s/g, "")), (c) => c.charCodeAt(0)));
-
-async function fetchData() {
-  try { return JSON.parse(await gh("/contents/data/data.json?ref=main", { raw: true })); }
-  catch (e) {
-    if (e.status === 401) { tokenRejected(); try { return JSON.parse(await gh("/contents/data/data.json?ref=main", { raw: true, auth: false })); } catch (e2) {} }
-  }
-  const r = await fetch("data/data.json?t=" + Date.now(), { cache: "no-store" });
+async function desdePages(ruta) {
+  const r = await fetch(`${ruta}?t=${Math.floor(Date.now() / 60e3)}`, { cache: "no-store" });
   if (!r.ok) throw new Error("pages " + r.status);
   return r.json();
 }
+const sello = (d) => d?.salud?.ultimo_intento || d?.salud?.ultima_corrida || d?.generado || "";
 const okCfg = (c) => c && typeof c === "object" && c.ida_centro && c.vuelta_centro && c.adultos ? c : null;
-async function fetchConfig() {
-  if (token) {
-    try { const f = await gh("/contents/config.json?ref=main"); const c = okCfg(JSON.parse(b64decode(f.content))); if (c) { configSha = f.sha; return c; } }
-    catch (e) { if (e.status === 401) tokenRejected(); }
-  }
-  try { const c = okCfg(JSON.parse(await gh("/contents/config.json?ref=main", { raw: true, auth: false }))); if (c) return c; } catch (e) {}
-  try { const r = await fetch("config.json?t=" + Date.now(), { cache: "no-store" }); if (r.ok) { const c = okCfg(await r.json()); if (c) return c; } } catch (e) {}
-  return null;
+/** Pide las dos copias a la vez. onPrimera recibe la primera que llegue; la promesa resuelve con la más nueva. */
+async function leerAmbas(ruta, mejor, onPrimera) {
+  let primera = null;
+  const avisa = (v) => { if (!primera && v) { primera = v; onPrimera?.(v); } return v; };
+  const res = await Promise.allSettled([desdeApi(ruta).then(avisa), desdePages(ruta).then(avisa)]);
+  const buenas = res.filter(x => x.status === "fulfilled" && x.value).map(x => x.value);
+  if (!buenas.length) throw new Error("sin datos");
+  return buenas.reduce(mejor);
+}
+const masNueva = (a, b) => sello(b) > sello(a) ? b : a;
+// config.json no trae fecha: si las dos copias difieren, la de la API es la recién guardada.
+const cfgApiPrimero = (a, b) => a;
+
+// ---------- Worker (escritura) ----------
+store.set("vuelos-token", null);  // el token de GitHub que antes se guardaba aquí ya no se usa
+let session = store.get(SESSION_KEY);
+if (session && session.vence < Date.now()) { session = null; store.set(SESSION_KEY, null); }
+async function worker(ruta, { method = "GET", body } = {}) {
+  if (!WORKER) { const e = new Error("sin worker"); e.status = -1; throw e; }
+  let r;
+  try {
+    r = await fetch(WORKER + ruta, { method, cache: "no-store",
+      headers: { "Content-Type": "application/json", ...(session ? { Authorization: `Bearer ${session.sesion}` } : {}) },
+      body: body ? JSON.stringify(body) : undefined });
+  } catch (e) { const err = new Error("red"); err.status = 0; throw err; }
+  let data = null; try { data = await r.json(); } catch (e) {}
+  if (!r.ok) { const err = new Error(data?.error || `Worker ${r.status}`); err.status = r.status; err.body = data; if (r.status === 401 && ruta !== "/sesion") sesionVencida(); throw err; }
+  return data;
 }
 
 // ---------- modelo ----------
@@ -362,19 +377,18 @@ async function save() {
   if (xSinAeropuerto()) { toast("Marca al menos un aeropuerto para el 4º (MEX o NLU) antes de guardar.", 5000); $("cXmex").focus(); return false; }
   setBusy(true); $("saveBtn").textContent = "Guardando…";
   try {
-    const r = await gh("/contents/config.json", { method: "PUT", body: { message: "config: reglas del viaje desde la página", content: b64encode(JSON.stringify(cfg, null, 2) + "\n"), sha: configSha || undefined, branch: "main" } });
-    configSha = r.content.sha; base = clone(cfg);
+    const r = await worker("/config", { method: "PUT", body: { config: cfg, sha: configSha } });
+    configSha = r.sha; base = clone(r.config || cfg); cfg = clone(base);
     toast("Guardado en config.json. La Mac y GitHub lo usan desde la próxima búsqueda.");
     return true;
   } catch (e) {
-    if (e.status === 409 || (e.status === 422 && /sha/i.test(e.body?.message || ""))) {
-      const fresh = await fetchConfig();
-      if (fresh) { base = fresh; cfg = clone(fresh); fillForm(); renderAll(); }
+    if (e.status === 409 && e.body?.config) {
+      configSha = e.body.sha; base = e.body.config; cfg = clone(base); fillForm(); renderAll();
       toast("config.json cambió en el repo mientras editabas. Cargué la versión actual: revisa y vuelve a guardar.", 6000);
-    } else if (e.status === 401) { tokenRejected(); }
-    else if (e.status === 403 || e.status === 404) toast("El token no puede escribir en el repo. Necesita Contents: lectura y escritura.", 6000);
-    else if (e.status === 0) toast("No se pudo guardar: sin conexión con GitHub. Tus cambios siguen aquí.", 6000);
-    else toast(`GitHub no aceptó el cambio (${e.status}). Tus cambios siguen aquí.`, 6000);
+    } else if (e.status === 401) { /* sesionVencida ya avisó */ }
+    else if (e.status === 422) toast(`No se guardó: ${e.message}`, 6000);
+    else if (e.status === 0) toast("No se pudo guardar: sin conexión. Tus cambios siguen aquí.", 6000);
+    else toast(`No se pudo guardar (${e.status}). Tus cambios siguen aquí.`, 6000);
     return false;
   } finally { $("saveBtn").textContent = "Guardar"; setBusy(false); }
 }
@@ -392,58 +406,47 @@ function showSteps(i, msg, failed = false) {
 function setRunning(r) {
   running = r; $("runBtn").disabled = r; $("healthdot").classList.toggle("busy", r); renderSavebar();
 }
-function stepOf(run, jobs) {
-  if (run.status !== "in_progress") return run.status === "completed" ? 3 : 0;
-  const steps = (jobs?.jobs || []).flatMap(j => j.steps || []);
-  const pub = steps.find(s => /publicar/i.test(s.name));
-  if (pub && pub.status !== "queued") return 2;
-  return steps.some(s => /buscar/i.test(s.name) && s.status !== "queued") ? 1 : 0;
-}
 const runLink = (r) => r?.html_url ? ` <a href="${esc(r.html_url)}" target="_blank" rel="noopener">Ver en GitHub</a>` : "";
 async function run() {
-  if (running || !token) return;
+  if (running || !session) return;
   setRunning(true);
-  const before = bestTotal(), t0 = Date.now() - 15000;
+  const before = bestTotal();
   showSteps(0, "Pidiendo la búsqueda a GitHub…");
-  try { await gh(`/actions/workflows/${WORKFLOW}/dispatches`, { method: "POST", body: { ref: "main" } }); }
+  let desde;
+  try { desde = (await worker("/buscar", { method: "POST" })).desde; }
   catch (e) {
-    const why = e.status === 401 ? "GitHub rechazó el token." : e.status === 403 ? "El token no tiene permiso de Actions (lectura y escritura)." : e.status === 404 ? `No encontré ${WORKFLOW} en el repo, o el token no ve Actions.` : e.status === 0 ? "Sin conexión con GitHub." : `GitHub respondió ${e.status}.`;
-    showSteps(0, `No se pudo arrancar la búsqueda. ${why}`, true); setRunning(false); if (e.status === 401) tokenRejected(); return;
+    const why = e.status === 0 ? "Sin conexión." : e.status === 401 ? "La sesión venció." : e.message;
+    showSteps(0, `No se pudo arrancar la búsqueda. ${esc(why)}`, true); setRunning(false); return;
   }
   let r = null;
   for (let i = 0; i < 30 && !r; i++) {
     await sleep(i ? 3000 : 1500);
-    try { const list = await gh(`/actions/workflows/${WORKFLOW}/runs?event=workflow_dispatch&per_page=5`); r = list.workflow_runs.find(x => new Date(x.created_at) >= t0) || null; } catch (e) {}
+    try { r = (await worker(`/run?desde=${encodeURIComponent(desde)}`)).run; } catch (e) {}
   }
   if (!r) { showSteps(0, "GitHub aceptó la búsqueda pero no aparece el run. Revisa Actions en unos minutos.", true); setRunning(false); return; }
   track(r, before);
 }
 async function track(r, before) {
   setRunning(true);
-  const deadline = Date.now() + 30 * 60e3; let i = 0, misses = 0;
-  while (Date.now() < deadline) {
-    try {
-      r = await gh(`/actions/runs/${r.id}`);
-      if (r.status === "completed") break;
-      const jobs = await gh(`/actions/runs/${r.id}/jobs`);
-      i = stepOf(r, jobs); misses = 0;
-      showSteps(i, [`Esperando un runner de GitHub Actions…`, `Consultando Google Flights, unos 5 minutos.${runLink(r)}`, `Guardando data.json en el repo…${runLink(r)}`][i]);
-    } catch (e) {
-      if (++misses >= 5) { showSteps(i, `Perdí contacto con GitHub. La búsqueda puede seguir corriendo.${runLink(r)}`, true); setRunning(false); return; }
-    }
-    await sleep(5000);
+  const deadline = Date.now() + 30 * 60e3; let misses = 0;
+  while (Date.now() < deadline && r.status !== "completed") {
+    showSteps(r.paso, [`Esperando un runner de GitHub Actions…`, `Consultando Google Flights, cerca de un minuto.${runLink(r)}`, `Guardando data.json en el repo…${runLink(r)}`][r.paso] || "");
+    await sleep(4000);
+    try { r = (await worker(`/run?id=${r.id}`)).run || r; misses = 0; }
+    catch (e) { if (++misses >= 5) { showSteps(r.paso, `Perdí contacto con GitHub. La búsqueda puede seguir corriendo.${runLink(r)}`, true); setRunning(false); return; } }
   }
-  if (r.status !== "completed") { showSteps(i, `La búsqueda lleva más de 30 minutos.${runLink(r)}`, true); setRunning(false); return; }
+  if (r.status !== "completed") { showSteps(r.paso, `La búsqueda lleva más de 30 minutos.${runLink(r)}`, true); setRunning(false); return; }
   if (r.conclusion !== "success") {
     const what = { failure: "falló", cancelled: "se canceló", timed_out: "se pasó del tiempo" }[r.conclusion] || `terminó como ${r.conclusion}`;
-    showSteps(Math.max(i, 1), `La búsqueda ${what}. Los datos de la página no cambiaron.${runLink(r)}`, true); setRunning(false); return;
+    showSteps(Math.max(r.paso, 1), `La búsqueda ${what}. Los datos de la página no cambiaron.${runLink(r)}`, true); setRunning(false); return;
   }
   showSteps(2, "Cargando los precios nuevos…");
-  const prev = DATA?.salud?.ultima_corrida;
-  try { await load({ quiet: true }); } catch (e) {}
+  const prev = sello(DATA);
+  // El dato recién publicado llega primero por la API; se reintenta unos segundos por si el commit aún no se ve.
+  for (let i = 0; i < 4; i++) { try { await load(); } catch (e) {} if (sello(DATA) !== prev) break; await sleep(2500); }
   const after = bestTotal();
   let msg;
-  if (DATA?.salud?.ultima_corrida === prev) msg = "La búsqueda terminó pero no publicó precios nuevos (Google y SerpApi pudieron fallar)." + runLink(r);
+  if (sello(DATA) === prev) msg = "La búsqueda terminó pero no publicó precios nuevos (Google y SerpApi pudieron fallar)." + runLink(r);
   else if (before == null || after == null) msg = after == null ? "Listo. Todavía no hay una combinación válida." : `Listo. El total más bajo es <b>${mxn(after)}</b>.`;
   else if (after < before) msg = `Encontró un precio mejor: <b>${mxn(after)}</b>, bajó ${mxn(before - after)}.`;
   else if (after > before) msg = `Sin precio mejor. El total más bajo ahora es ${mxn(after)}, subió ${mxn(after - before)}.`;
@@ -452,17 +455,13 @@ async function track(r, before) {
 }
 $("runBtn").onclick = run;
 async function resumeRun() {
-  try {
-    const list = await gh(`/actions/workflows/${WORKFLOW}/runs?per_page=1`);
-    const r = list.workflow_runs[0];
-    if (r && r.status !== "completed") track(r, bestTotal());
-  } catch (e) {}
+  try { const r = (await worker("/run")).run; if (r && r.status !== "completed") track(r, bestTotal()); } catch (e) {}
 }
 
-// ---------- token y vista ----------
+// ---------- sesión y vista ----------
 function setView(v) {
   view = v; $("app").classList.toggle("editor", v === "editor"); $("app").classList.toggle("ro", v !== "editor");
-  $("keyTxt").textContent = v === "editor" ? "Quitar token" : "Editar";
+  $("keyTxt").textContent = v === "editor" ? "Salir" : "Editar";
   if (v === "group" && base) { cfg = clone(base); sel = null; $("runstrip").hidden = true; }
   if (cfg) { fillForm(); renderAll(); }
 }
@@ -472,41 +471,35 @@ function openTokenbar(msg) {
   $("tokenIn").focus();
 }
 function closeTokenbar() { $("tokenbar").hidden = true; $("keyBtn").setAttribute("aria-expanded", "false"); $("tokenIn").value = ""; $("tokenErr").hidden = true; }
-function forgetToken() { token = null; configSha = null; try { localStorage.removeItem(TOKEN_KEY); } catch (e) {} }
-function tokenRejected() {
-  if (!token) return;
-  forgetToken(); setView("group");
-  openTokenbar("GitHub rechazó el token guardado: está mal copiado o ya venció. Pega uno nuevo.");
+function salir() { session = null; configSha = null; store.set(SESSION_KEY, null); }
+function sesionVencida() {
+  if (!session) return;
+  salir(); setView("group");
+  openTokenbar("Tu sesión venció o cambió la contraseña. Vuelve a entrar.");
 }
-async function checkToken(t) {
-  const prev = token; token = t;
-  try {
-    const repo = await gh("");
-    if (!repo.permissions?.push) { token = prev; return "El token solo puede leer el repo. Necesita Contents y Actions de lectura y escritura."; }
-    return null;
-  } catch (e) {
-    token = prev;
-    if (e.status === 401) return "GitHub rechazó el token: está mal copiado o ya venció.";
-    if (e.status === 403 || e.status === 404) return `El token no tiene acceso a ${REPO}.`;
-    if (e.status === 0) return "Sin conexión con GitHub. Intenta de nuevo.";
-    return `GitHub respondió ${e.status}.`;
-  }
+/** Trae config.json con su sha desde el Worker (lo necesita para guardar sin pisar cambios). */
+async function cargarConfigEditor() {
+  try { const r = await worker("/config"); configSha = r.sha; if (okCfg(r.config)) { const keep = cfg && base && dirty(); base = r.config; if (!keep) cfg = clone(base); } } catch (e) {}
 }
 $("keyBtn").onclick = () => {
-  if (token) { forgetToken(); setView("group"); toast("Token quitado de este navegador"); return; }
+  if (session) { salir(); setView("group"); toast("Saliste del modo edición en este navegador"); return; }
   $("tokenbar").hidden ? openTokenbar() : closeTokenbar();
 };
 $("tokenCancel").onclick = closeTokenbar;
 $("tokenbar").onsubmit = async (e) => {
   e.preventDefault();
-  const t = $("tokenIn").value.trim(); if (!t) { $("tokenIn").focus(); return; }
+  const clave = $("tokenIn").value; if (!clave) { $("tokenIn").focus(); return; }
   $("tokenSave").disabled = true; $("tokenSave").textContent = "Revisando…";
-  const err = await checkToken(t);
-  $("tokenSave").disabled = false; $("tokenSave").textContent = "Usar token";
-  if (err) { $("tokenErr").hidden = false; $("tokenErr").textContent = err; return; }
-  token = t; try { localStorage.setItem(TOKEN_KEY, t); } catch (e2) {}
+  try {
+    const r = await worker("/sesion", { method: "POST", body: { clave } });
+    session = { sesion: r.sesion, vence: r.vence }; store.set(SESSION_KEY, session);
+  } catch (err) {
+    $("tokenErr").hidden = false;
+    $("tokenErr").textContent = err.status === 401 ? "Contraseña incorrecta." : err.status === 429 ? "Demasiados intentos. Espera un minuto." : err.status === 0 ? "Sin conexión. Intenta de nuevo." : err.status === -1 ? "La edición aún no está configurada." : `No se pudo entrar (${err.status}).`;
+    return;
+  } finally { $("tokenSave").disabled = false; $("tokenSave").textContent = "Entrar"; }
   closeTokenbar();
-  const fresh = await fetchConfig(); if (fresh) base = fresh;
+  await cargarConfigEditor();
   setView("editor"); toast("Modo edición activo"); resumeRun();
 };
 document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !$("tokenbar").hidden) { closeTokenbar(); $("keyBtn").focus(); } });
@@ -584,25 +577,34 @@ function applyData(d, conf) {
   if (conf) { const keep = cfg && base && dirty(); base = conf; if (!keep) cfg = clone(conf); }
   else if (!base) { base = clone(used); cfg = clone(used); }
 }
-async function load({ quiet = false } = {}) {
-  const [d, conf] = await Promise.all([fetchData(), fetchConfig()]);
-  applyData(d, conf);
+function pintar(d, conf) {
+  // En modo edición manda la config del Worker (trae sha y es la recién guardada); la pública puede ir atrasada.
+  applyData(d, session && base ? base : conf);
   $("app").classList.remove("loading");
   fillForm(); renderAll();
 }
+/** Pinta con la primera copia que llegue y al final con la más nueva; guarda la última buena en el navegador. */
+async function load() {
+  const confP = leerAmbas("config.json", cfgApiPrimero).then(okCfg).catch(() => null);
+  const d = await leerAmbas("data/data.json", masNueva, (primera) => {
+    if (!DATA || sello(primera) > sello(DATA)) confP.then(c => { if (!DATA || sello(primera) > sello(DATA)) pintar(primera, c || base); });
+  });
+  const conf = await confP;
+  pintar(d, conf || base);
+  store.set(CACHE_KEY, { d, c: conf || base });
+}
 async function start() {
-  renderLoading();
-  if (token) {
-    const err = await checkToken(token);
-    if (err && !/conexión/.test(err)) { forgetToken(); openTokenbar("El token guardado ya no sirve. " + err); }
-    else view = "editor";
-  }
-  try { await load(); } catch (e) { renderLoadError(); return; }
+  const cache = store.get(CACHE_KEY);
+  if (cache?.d && okCfg(cache.c)) pintar(cache.d, cache.c); else renderLoading();
+  if (session) view = "editor";
+  const editor = session ? cargarConfigEditor() : null;
+  try { await load(); } catch (e) { if (!DATA) { renderLoadError(); return; } toast(`Sin conexión: ves los precios de ${fstamp(DATA.salud?.ultima_corrida)}.`, 5000); }
+  if (editor) await editor;
   setView(view);
   if (view === "editor") resumeRun();
 }
 // Recarga en silencio cada 10 min mientras la pestaña está visible; si falla, se quedan los datos en pantalla.
-setInterval(() => { if (document.visibilityState === "visible" && DATA && !running && !busy && !dirty()) load({ quiet: true }).catch(() => toast(`No se pudieron recargar los precios; ves los de ${fstamp(DATA.salud?.ultima_corrida)}.`)); }, 10 * 60e3);
+setInterval(() => { if (document.visibilityState === "visible" && DATA && !running && !busy && !dirty()) load().catch(() => toast(`No se pudieron recargar los precios; ves los de ${fstamp(DATA.salud?.ultima_corrida)}.`)); }, 10 * 60e3);
 let rz; addEventListener("resize", () => { clearTimeout(rz); rz = setTimeout(() => DATA && renderHist(), 120); });
 start();
 })();
