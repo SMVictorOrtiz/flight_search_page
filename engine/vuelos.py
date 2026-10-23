@@ -604,7 +604,8 @@ def _corrida(cfg: dict, estado: dict, ahora: datetime, b: "Buscador") -> int:
     for direccion, ap, o, d, fecha, n_pax in tareas:
         clave = f"{direccion}|{ap}|{fecha}"
         opciones, fuente = b.buscar(o, d, fecha, clave in con_vuelo, n_pax)
-        time.sleep(random.uniform(*b.pausa))
+        if fuente != "sin-fuente":  # sin fuente no hubo petición: no hace falta esperar
+            time.sleep(random.uniform(*b.pausa))
         if opciones is None:
             log.info("%-6s %s %s: no se pudo consultar", direccion, ap, fecha)
             continue
@@ -636,7 +637,8 @@ def _corrida(cfg: dict, estado: dict, ahora: datetime, b: "Buscador") -> int:
     if toca_cdmx and consultas_ok:
         estado["ultima_busqueda_cdmx"] = ahora.isoformat(timespec="minutes")
     estado["dias_con_vuelo"] = sorted(con_vuelo)
-    estado["ultima_corrida"] = ahora.isoformat(timespec="minutes")
+    # ultima_corrida = última con precios; un intento fallido no debe hacer parecer frescos los datos
+    estado["ultimo_intento"] = ahora.isoformat(timespec="minutes")
 
     if consultas_ok == 0:
         log.error("Ninguna consulta funcionó en esta corrida.")
@@ -647,6 +649,7 @@ def _corrida(cfg: dict, estado: dict, ahora: datetime, b: "Buscador") -> int:
                        "Lleva 6 corridas sin poder consultar precios. Revisa logs/monitor.log")
         return 1
     estado["corridas_fallidas_seguidas"] = 0
+    estado["ultima_corrida"] = ahora.isoformat(timespec="minutes")
 
     # Limpia del caché fechas excluidas o fuera de rango (por si cambiaste config.json)
     validas_ida, validas_vta = set(ida_fechas), set(vta_fechas)
@@ -734,7 +737,8 @@ def publicar() -> int:
     mejor = f" — mejor {mxn(top[0]['total'])}" if top else ""
     quien = "CI" if EN_CI else "Mac"
     try:
-        final = sincronizar.publicar(local, token, f"datos: corrida {quien} {local['salud']['ultima_corrida']}{mejor}")
+        cuando = local["salud"].get("ultimo_intento") or local["salud"]["ultima_corrida"]
+        final = sincronizar.publicar(local, token, f"datos: corrida {quien} {cuando}{mejor}")
     except Exception as e:
         log.error("No pude publicar data.json: %s", e)
         return 1

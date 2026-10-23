@@ -47,6 +47,15 @@ class Fusion(unittest.TestCase):
         self.assertEqual(s["fuente"], "GitHub Actions (SerpApi)")
         self.assertEqual(s["serpapi_mes"]["usadas"], 12)
 
+    def test_intento_fallido_no_refresca_los_datos(self):
+        r = snap(salud={"ultima_corrida": "2026-10-23T00:07", "fallidas_seguidas": 0, "fuente": "Mac (fast-flights)"})
+        l = snap(salud={"ultima_corrida": None, "ultimo_intento": "2026-10-23T00:08", "fallidas_seguidas": 1,
+                        "fuente": "GitHub Actions (sin fuente)", "corridas": {"ci": 0}})
+        s = fusionar(r, l)["salud"]
+        self.assertEqual(s["ultima_corrida"], "2026-10-23T00:07")
+        self.assertEqual(s["ultimo_intento"], "2026-10-23T00:08")
+        self.assertEqual(s["fallidas_seguidas"], 1)
+
     def test_minimo_y_alerta(self):
         r = snap(minimo_historico={"total": 100, "cuando": "a"}, ultima_alerta={"total": 5, "cuando": "2026-10-01"})
         l = snap(minimo_historico={"total": 90, "cuando": "b"}, ultima_alerta={"total": 9, "cuando": "2026-09-01"})

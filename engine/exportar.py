@@ -81,6 +81,7 @@ def armar(cfg: dict, estado: dict, datos: Path, lado: str, fuente: str, motor: s
     sp = estado.get("serpapi_mes") or {}
     salud = {
         "ultima_corrida": estado.get("ultima_corrida"),
+        "ultimo_intento": estado.get("ultimo_intento") or estado.get("ultima_corrida"),
         "fallidas_seguidas": estado.get("corridas_fallidas_seguidas", 0),
         "corridas_total": n + estado.get("corridas_base", 0),
         "desde": estado.get("desde_base") or desde,
@@ -144,9 +145,11 @@ def _fusionar_salud(r: dict, l: dict) -> dict:
     cr = dict(r.get("corridas") or {"mac": r.get("corridas_total", 0)}) if r else {}
     for lado, n in (l.get("corridas") or {}).items():
         cr[lado] = max(cr.get(lado, 0), n)
-    nueva = _reciente(l, r, "ultima_corrida")
+    intento = lambda s: s.get("ultimo_intento") or s.get("ultima_corrida")
+    nueva = l if (intento(l) or "") >= (intento(r) or "") else r  # fallas y fuente: del último intento
     out = {
         "ultima_corrida": max(filter(None, [r.get("ultima_corrida"), l.get("ultima_corrida")]), default=None),
+        "ultimo_intento": max(filter(None, [intento(r), intento(l)]), default=None),
         "fallidas_seguidas": nueva.get("fallidas_seguidas", 0),
         "corridas_total": sum(cr.values()),
         "desde": min(filter(None, [r.get("desde"), l.get("desde")]), default=None),

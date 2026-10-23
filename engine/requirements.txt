@@ -1,1 +1,6 @@
-fast-flights>=3.1,<4
+# Mismas versiones que en ~/vuelos-monitor/.venv (fast-flights no declara typing_extensions)
+fast-flights==3.1.0
+primp==2.0.1
+protobuf==7.36.2
+selectolax==0.4.12
+typing_extensions==4.16.0
