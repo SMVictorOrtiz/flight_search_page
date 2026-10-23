@@ -635,7 +635,7 @@
     "rules": [
       {
         "name": "La regla del hilo como dato",
-        "body": "Verde, amarillo, rosa y rojo solo marcan precio. En la matriz, tal como está construida, las casillas válidas se agrupan por cuartil de sus totales (verde = cuartil más barato … rojo = más caro) y la leyenda muestra el rango en pesos de cada banda. Pendiente de decisión del usuario: bandear contra la meta en lugar de por cuartil.",
+        "body": "Verde, amarillo, rosa y rojo solo marcan precio. En la matriz, tal como está construida, las casillas válidas se agrupan por cuartil de sus totales (verde = cuartil más barato … rojo = más caro) y la leyenda muestra el rango en pesos de cada banda. Decisión cerrada (23 oct 2026): se queda el cuartil; la cercanía a la meta la dicen la barra de meta y la etiqueta «en meta» de cada casilla, no el color.",
         "section": "colors"
       },
       {

@@ -182,7 +182,7 @@ Manta y tinta de hilo negro, con cuatro hilos de bordado reservados a los datos 
 Tema oscuro: los mismos nombres se redefinen bajo `@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) }` y, de forma idéntica, en `:root[data-theme="dark"]` (ground #101310, surface #171b17, raised #20251f, ink #ecefe9, shell #173d29, verde #4fb377, amarillo #e6b83f, rosa #ec6a9c, rojo #e2565d, good #5cc287, bad #ec6a70, notice-bg #2a2412, notice-ink #f0cf80; lista completa en el sidecar), con `color-scheme: dark`.
 
 ### Named Rules
-**La regla del hilo como dato.** Verde, amarillo, rosa y rojo solo marcan precio. En la matriz, tal como está construida, las casillas válidas se agrupan por cuartil de sus totales (verde = cuartil más barato … rojo = más caro) y la leyenda muestra el rango en pesos de cada banda. Pendiente de decisión del usuario: bandear contra la meta en lugar de por cuartil.
+**La regla del hilo como dato.** Verde, amarillo, rosa y rojo solo marcan precio. En la matriz, tal como está construida, las casillas válidas se agrupan por cuartil de sus totales (verde = cuartil más barato … rojo = más caro) y la leyenda muestra el rango en pesos de cada banda. Decisión cerrada (23 oct 2026): se queda el cuartil; la cercanía a la meta la dicen la barra de meta y la etiqueta «en meta» de cada casilla, no el color.
 
 **La regla de la tinta.** La respuesta (total, barra de meta, línea del historial, selección) va en tinta negra, nunca en un hilo de color.
 
