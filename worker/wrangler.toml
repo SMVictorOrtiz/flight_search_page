@@ -1,0 +1,18 @@
+# Worker que guarda el token de GitHub para la página (ver src/index.js).
+# Secretos, que nunca van aquí:  npx wrangler secret put GITHUB_TOKEN | CLAVE | SESION_SECRETO
+name = "vuelos-merida"
+main = "src/index.js"
+compatibility_date = "2025-09-01"
+
+[vars]
+REPO = "SMVictorOrtiz/flight_search_page"
+ORIGENES = "https://smvictorortiz.github.io,http://localhost:8765"
+
+# 5 intentos de contraseña por minuto por IP
+[[ratelimits]]
+name = "INTENTOS"
+namespace_id = "1001"
+
+  [ratelimits.simple]
+  limit = 5
+  period = 60
