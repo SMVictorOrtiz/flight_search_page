@@ -1,0 +1,8 @@
+.DS_Store
+.impeccable/questions/
+*.local.json
+.github_token
+*token*
+.env
+__pycache__/
+PROMPT_CLAUDE_CODE.md

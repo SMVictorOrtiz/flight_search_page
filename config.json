@@ -1,0 +1,42 @@
+{
+  "origen": "PBC",
+  "destino": "MID",
+  "adultos": 3,
+  "solo_directos": true,
+  "ida_centro": "2026-12-22",
+  "vuelta_centro": "2026-12-29",
+  "flex_dias": 2,
+  "noches_min": 5,
+  "noches_max": 9,
+  "umbral_total_mxn": 16000,
+  "realertar_si_baja_mxn": 300,
+  "realertar_cada_horas": 12,
+  "serpapi_max_por_dia": 8,
+  "pausa_entre_busquedas_seg": [
+    4,
+    9
+  ],
+  "excluir_ida": [
+    "2026-12-24"
+  ],
+  "excluir_vuelta": [
+    "2026-12-31"
+  ],
+  "aeropuertos_alternos": {
+    "MEX": 480,
+    "NLU": 545
+  },
+  "alternos_cada_horas": 2,
+  "grupo_cdmx": {
+    "adultos": 1,
+    "aeropuertos": [
+      "MEX",
+      "NLU"
+    ],
+    "cada_horas": 1
+  },
+  "equipaje_mano": 0,
+  "maletas_documentadas": 0,
+  "top_n": 3,
+  "costo_equipaje_por_persona_tramo": 0
+}
